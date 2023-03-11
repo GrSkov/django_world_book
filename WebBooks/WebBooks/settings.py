@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 
 import os
 from pathlib import Path
+import dj_database_url
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -54,6 +55,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -140,3 +142,18 @@ LOGIN_REDIRECT_URL = '/'
 
 # Для тестирования работы всех созданных шаблонов страниц
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+# Heroku: Обновление конфигурации базы данных из $DATABASE_URL.
+# Значение conn_max_age=500 делает соединение постоянным, что намного эффективнее, чем воссоздать его в каждом цикле
+# запросов. Однако это не обязательно, и при необходимости этот параметр можно удалить.
+db_from_env = dj_database_url.config(conn_max_age=500)
+DATABASES['default'].update(db_from_env)
+
+# Статичные файлы (CSS, JavaScript, Images)
+# https://docs.djangoproject.com/en/1.10/howto/static-files/
+# Абсолютный путь к каталогу, в котором collectstatic будет собирать статические файлы для развёртывания.
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+# Упрощенная обработка статических файлов.
+# https://warehouse.python.org/project/whitenoise/
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
